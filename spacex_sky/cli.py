@@ -96,7 +96,7 @@ def cmd_notify(args):
     if new:
         cache.write_cache("notified.json", (sent + new)[-200:])
     elif args.verbose:
-        print("Nothing coming up in the next", args.minutes, "minutes.")
+        print(f"Nothing new to notify in the next {args.minutes} minutes.")
 
 
 def main(argv=None):

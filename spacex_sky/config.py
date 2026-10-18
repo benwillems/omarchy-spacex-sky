@@ -10,7 +10,7 @@ PLACE = os.environ.get("SPACEX_SKY_PLACE", "Jacksonville")
 TZ = ZoneInfo(os.environ.get("SPACEX_SKY_TZ", "America/New_York"))
 TZ_LABEL = os.environ.get("SPACEX_SKY_TZ_LABEL", "ET")
 
-CACHE_DIR = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "spacex-sky"
+CACHE_DIR = Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / "spacex-sky"
 
 # Launch Library 2. The free tier allows ~15 requests/hour, so we make ONE
 # request (SpaceX only, upcoming) and cache it for an hour.
