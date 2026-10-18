@@ -1,0 +1,6 @@
+[Unit]
+Description=spacex-sky: notify before Starlink train passes and Florida launches
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/spacex-sky notify --minutes 15 --launches

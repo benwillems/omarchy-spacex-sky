@@ -1,0 +1,4 @@
+/* Append to ~/.config/waybar/style.css */
+#custom-spacex-sky { margin: 0 8px; }
+#custom-spacex-sky.train { color: #f9e2af; }   /* a pass is coming up tonight */
+#custom-spacex-sky.launch { color: #89b4fa; }
