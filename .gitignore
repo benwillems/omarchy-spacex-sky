@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 .venv/
+GROK_*.md
+grok-*.log
+popup.png
+

@@ -124,8 +124,10 @@ def _merge_trains(segments, group):
             "age_at_pass": pass_age, "count": len(sats), "group_size": len(group["records"]),
             "start": lead["start"], "end": last["end"],
             "start_dir": sky.compass(lead["start_az"]), "end_dir": sky.compass(lead["end_az"]),
+            "start_az": float(lead["start_az"]), "end_az": float(lead["end_az"]),
             "start_alt": lead["start_alt"], "end_alt": lead["end_alt"],
-            "peak_alt": lead["peak_alt"], "peak_dir": sky.compass(lead["peak_az"]),
+            "peak_alt": lead["peak_alt"], "peak_az": float(lead["peak_az"]),
+            "peak_dir": sky.compass(lead["peak_az"]),
             "one_sat_seconds": (lead["end"] - lead["start"]).total_seconds(),
             "train_minutes": (last["end"] - lead["start"]).total_seconds() / 60,
             "fades": lead["fades"], "emerges": lead["emerges"],
@@ -145,7 +147,7 @@ def score(p):
 
 def compute(days=5, max_age_days=10, refresh=False):
     """Return (groups, ranked passes). Cached for an hour."""
-    key = f"passes_{days}d_{max_age_days}a_{config.LAT:.2f}_{config.LON:.2f}.json"
+    key = f"passes_v2_{days}d_{max_age_days}a_{config.LAT:.2f}_{config.LON:.2f}.json"
     cached = None if refresh else cache.read_cache(key, config.PASS_CACHE_SECONDS)
     if cached is not None:
         for p in cached["passes"]:

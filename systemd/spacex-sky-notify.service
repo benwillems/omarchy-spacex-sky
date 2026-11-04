@@ -1,5 +1,5 @@
 [Unit]
-Description=spacex-sky: notify before Starlink train passes and Florida launches
+Description=spacex-sky: notify before Starlink passes, and when a Florida launch is today or about to lift off
 
 [Service]
 Type=oneshot

@@ -1,98 +1,94 @@
-# omarchy-spacex-sky 🚀✨
+# SpaceX Sky
 
-A small Omarchy (Arch + Hyprland + Waybar) helper for watching SpaceX from your
-backyard with the kids:
+Omarchy bar widget for watching SpaceX from the backyard with the kids.
+The rocket in the bar is the next thing to walk outside for: a Florida
+launch, a Starlink train, or another pad you starred. Click it for the
+sky board — where to look, a compass, and a webcast link.
 
-- **`spacex-sky launches`**: upcoming SpaceX launches in Eastern time, with a big
-  🌴 **FLORIDA** marker for Cape Canaveral / Kennedy pads (vs. California and Texas),
-  which way to look, and whether it's a night, twilight or daytime launch.
-- **`spacex-sky trains`**: ranked, visible **Starlink "train"** passes for recently
-  launched groups: when, which direction to face, how high, how long, plus a
-  kid-friendly line to read out loud.
-- **`spacex-sky waybar`**: a Waybar module showing `🚀 FL 1d 5h` (next Florida launch
-  countdown), with `★ 7:16pm` in front when a train passes tonight.
-- **`spacex-sky notify`**: a desktop notification 15 minutes before a pass (and,
-  optionally, a Florida launch), run from a systemd *user* timer.
+Plugin id: `bjw.spacex-sky`. Defaults to Jacksonville, FL
+(30.13 N, 81.53 W) in America/New_York.
 
-Defaults to Jacksonville, FL (30.13 N, 81.53 W) in America/New_York.
+## Install
 
-## Install (on the Omarchy machine)
+The widget is an Omarchy shell plugin. The launch and train data comes
+from a small Python helper that needs [Skyfield](https://rhodesmill.org/skyfield/).
 
 ```bash
-tar xzf omarchy-spacex-sky.tar.gz && cd omarchy-spacex-sky
-./install.sh
-spacex-sky launches
-spacex-sky trains
+omarchy plugin add https://github.com/benwillems/omarchy-spacex-sky.git --enable
+~/.config/omarchy/plugins/bjw.spacex-sky/install.sh
+omarchy restart shell
 ```
 
-`install.sh` is user-only, no sudo: it copies the app to
-`~/.local/share/omarchy-spacex-sky`, creates a Python venv there with
-[Skyfield](https://rhodesmill.org/skyfield/), and writes the `~/.local/bin/spacex-sky`
-wrapper. Caches live in `~/.cache/spacex-sky`, including a one-time ~17 MB planet
-ephemeris (`de421.bsp`). Run `./uninstall.sh` to remove everything.
+`install.sh` is user-only (no sudo). It creates a venv in
+`~/.local/share/omarchy-spacex-sky`, installs Skyfield, and writes
+`~/.local/bin/spacex-sky`. Caches live in `~/.cache/spacex-sky`,
+including a one-time ~17 MB planet ephemeris (`de421.bsp`).
 
-## Commands
+Move the widget with:
+
+```bash
+omarchy bar move bjw.spacex-sky --section center
+```
+
+## Remove
+
+```bash
+omarchy plugin remove bjw.spacex-sky
+~/.config/omarchy/plugins/bjw.spacex-sky/uninstall.sh
+```
+
+If the plugin folder is already gone, run `uninstall.sh` from a clone of
+this repository. Favorites in `~/.config/omarchy-spacex-sky/` are left in
+place.
+
+## Usage
+
+Click the rocket for the sky board. Tap a city to filter, tap its star
+for alerts. Cape Canaveral is one star for every Cape pad; Kennedy is one
+star for LC-39A and LC-39B. Each launch still names its pad.
+
+The bar shows the hero (`Cape · SLC-40`, or `★ 7:16pm` for a train).
+Florida is a second beat only when that is a different event. Date-only
+NETs print the calendar day instead of a fake countdown.
 
 ```
-spacex-sky launches [--florida] [-n 12] [--refresh]
+spacex-sky launches [--florida] [--favorites] [--site NAME] [-n 12] [--refresh]
 spacex-sky trains   [--days 5] [--max-age 10] [--top 8] [--refresh]
-spacex-sky waybar
+spacex-sky json     [--refresh]
+spacex-sky favorite list | toggle NAME | add NAME | remove NAME
+spacex-sky filter [show] | set all|favorites|NAME
 spacex-sky notify   [--minutes 15] [--launches] [-v]
 ```
 
-`--max-age 30` also shows older Starlink groups. They're more spread out and fainter,
-but still fun to spot.
+New helper installs favorite Cape Canaveral and Kennedy. Star or unstar
+cities in the popup, or with `favorite toggle`.
 
-## Waybar
+## Dependencies
 
-In `~/.config/waybar/config.jsonc`, add `"custom/spacex-sky"` to `modules-right` and
-add this block (also in `examples/waybar-module.jsonc`):
+- Omarchy Quattro shell (Quickshell)
+- `python3` and a working venv (`python -m venv`)
+- Skyfield (installed into the user venv by `install.sh`)
+- Launch Library 2 (`ll.thespacedevs.com`, SpaceX agency id 121)
+- CelesTrak GP and SATCAT data for Starlink trains
+- `notify-send` only if you enable the optional alert timer
 
-```jsonc
-"custom/spacex-sky": {
-  "exec": "~/.local/bin/spacex-sky waybar",
-  "return-type": "json",
-  "interval": 600,
-  "tooltip": true,
-  "on-click": "alacritty --class spacex-sky -e bash -c 'spacex-sky launches; read -n1 -p \"Press any key to close\"'",
-  "on-click-right": "alacritty --class spacex-sky -e bash -c 'spacex-sky trains; read -n1 -p \"Press any key to close\"'"
-}
-```
+No root, no system packages beyond Python, and no edits under
+`/usr/share/omarchy/`.
 
-Optional colors: `examples/waybar-style.css`. Then restart Waybar (`omarchy-restart-waybar`,
-or `pkill waybar && waybar &`).
+## Optional alerts
 
-## Hyprland keybinds
-
-Add to `~/.config/hypr/bindings.conf` (see `examples/hyprland.conf`):
-
-```ini
-bindd = SUPER CTRL ALT, L, SpaceX launches, exec, alacritty --class spacex-sky -e bash -c 'spacex-sky launches; read -n1 -p "Press any key to close"'
-bindd = SUPER CTRL ALT, S, Starlink trains, exec, alacritty --class spacex-sky -e bash -c 'spacex-sky trains; read -n1 -p "Press any key to close"'
-
-windowrule = float, class:^(spacex-sky)$
-windowrule = size 1000 750, class:^(spacex-sky)$
-windowrule = center, class:^(spacex-sky)$
-```
-
-If you use Ghostty or Kitty instead of Alacritty, swap the terminal (both accept `--class`).
-The `windowrule` lines use the Hyprland 0.48+ syntax. If `hyprctl configerrors` complains,
-your Hyprland uses the newer rule syntax, so adjust them to match the other rules in
-`~/.config/hypr/`.
-
-## Notifications (optional, systemd user timer)
+`install.sh` does not enable a timer. To get a desktop notification 15
+minutes before a Starlink pass, when a Florida launch (or a launch from a
+starred city) is inside 12 hours, and 15 minutes before that liftoff:
 
 ```bash
 mkdir -p ~/.config/systemd/user
 cp systemd/spacex-sky-notify.{service,timer} ~/.config/systemd/user/
 systemctl --user daemon-reload
 systemctl --user enable --now spacex-sky-notify.timer
-# test right now:
-spacex-sky notify -v --minutes 600
 ```
 
-Every 5 minutes it checks for a train pass (and, with `--launches`, a Florida launch)
-starting within 15 minutes, and sends one `notify-send` per event.
+Florida always alerts, even if those cities are unstarred.
 
 ## Different location
 
@@ -100,34 +96,9 @@ starting within 15 minutes, and sends one `notify-send` per event.
 export SPACEX_SKY_LAT=30.13 SPACEX_SKY_LON=-81.53 SPACEX_SKY_PLACE="Jacksonville"
 ```
 
-To make that apply to Waybar and the keybinds too, put the exports at the top of
-`~/.local/bin/spacex-sky`.
+Put those exports at the top of `~/.local/bin/spacex-sky` to apply them
+to the bar as well.
 
-## How it works
+## License
 
-- **Launches:** one request to Launch Library 2
-  (`ll.thespacedevs.com/2.3.0/launches/upcoming/?lsp__id=121`, SpaceX only), cached
-  for 1 hour. The free tier allows about 15 requests/hour, so this stays well under it.
-  If the network or the rate limit fails, it uses the last cached copy. A pad counts as
-  "Florida" when its location is Cape Canaveral SFS or Kennedy Space Center. Day/night is
-  the sun's altitude at your house at launch time.
-- **Trains:** CelesTrak's `last-30-days` GP (orbit) data plus SATCAT launch dates,
-  cached for 2 hours, which is CelesTrak's update cadence. For each Starlink satellite
-  launched in the last 10 days, Skyfield finds passes for the next 5 days and keeps the
-  part where **the sun is below −6° for you**, **the satellite is in sunlight**, and it's
-  at least 10° up. A pass needs to peak at **20° or higher**. Satellites from the same
-  launch that pass within minutes of each other are merged into one "train". Ranking
-  favors high passes, more satellites, fresher launches, and kid-friendly hours (6–9:30 PM).
-
-## Honest limitations
-
-- Starlink trains only look like a bright **string of pearls for the first few days**
-  after launch. Within about a week they raise their orbits, spread out, and turn
-  edge-on to dim themselves.
-- Brand-new groups take up to about a day to appear in CelesTrak, and their early orbit
-  data is the least accurate. Go out 5 minutes early.
-- Brightness (magnitude) isn't modeled. Clouds, the moon and city light all matter.
-- Launch times slip constantly. Anything not marked to the minute is a placeholder
-  date from Launch Library.
-- Morning passes often *appear* partway up the sky, when the satellites come out of
-  Earth's shadow. Evening passes often *fade out* overhead, when they go into it.
+MIT. See [LICENSE](LICENSE).
