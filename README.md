@@ -33,8 +33,8 @@ omarchy bar move bjw.spacex-sky --section center
 ## Remove
 
 ```bash
-omarchy plugin remove bjw.spacex-sky
 ~/.config/omarchy/plugins/bjw.spacex-sky/uninstall.sh
+omarchy plugin remove bjw.spacex-sky
 ```
 
 If the plugin folder is already gone, run `uninstall.sh` from a clone of
